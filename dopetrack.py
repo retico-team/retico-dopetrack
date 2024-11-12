@@ -8,17 +8,17 @@ import numpy as np
 import threading
 from collections import deque
 
-from src import postprocess, visu3d
-from src import visu
-from src.model import dope_resnet50, num_joints
-
 import retico_core
 from retico_vision.vision import PosePositionsIU, ImageIU
+
+from src import postprocess
+from src import visu
+from src.model import dope_resnet50, num_joints
 
 
 class DopeTrackingModule(retico_core.AbstractModule):
     """
-    A pose tracking module using Distillation of Part Experts (DOPE)
+    A pose tracking module using a Distillation of Part Experts (DOPE) model.
     """
 
     @staticmethod
@@ -39,9 +39,7 @@ class DopeTrackingModule(retico_core.AbstractModule):
 
     def __init__(self, visualizer=False, **kwargs):
         """
-
         :param visualizer: boolean to determine if webcam output with annotations is shown
-        :param kwargs:
         """
 
         super().__init__(**kwargs)
@@ -53,6 +51,11 @@ class DopeTrackingModule(retico_core.AbstractModule):
     def detect_pose(self, image, modelname='DOPErealtime_v1_0_0', postprocessing='ppi', half=True):
         """
         Perform pose detection on an image.
+
+        :param image: Image to perform detections on.
+        :param modelname: Name of model checkpoint to use. Defaults to 'DOPErealtime_v1_0_0'.
+        :param postprocessing: The type of detection postprocessing to use (can be 'ppi' or 'nms'). Defaults to 'ppi'.
+        :param half: Boolean indicating whether to use half computation or not. Defaults to True.
         """
 
         if postprocessing=='ppi':
@@ -74,7 +77,6 @@ class DopeTrackingModule(retico_core.AbstractModule):
 
         print('Loading model', modelname)
         ckpt = torch.load(ckpt_fname, map_location=device)
-
 
         # Half computation is true by default. Change to false in case your device cannot handle half computation
         # Sets half computation usage
@@ -137,13 +139,12 @@ class DopeTrackingModule(retico_core.AbstractModule):
 
         return postprocess.assign_hands_and_head_to_body(detections)
 
-
     def process_update(self, update_message):
         for iu, ut in update_message:
             if ut == retico_core.UpdateType.ADD:
                 self.queue.append(iu)
 
-    def run_tracker(self):
+    def _run_tracker(self):
         while self._run_tracker_active:
             if len(self.queue) == 0:
                 time.sleep(0.05)
@@ -199,7 +200,7 @@ class DopeTrackingModule(retico_core.AbstractModule):
 
     def setup(self):
         self._run_tracker_active = True
-        t = threading.Thread(target=self.run_tracker)
+        t = threading.Thread(target=self._run_tracker)
         t.start()
 
     def shutdown(self):

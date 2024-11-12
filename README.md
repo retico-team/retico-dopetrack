@@ -1,5 +1,5 @@
-# retico-clip
-A ReTiCo module for CLIP. See below for more information.
+# retico-dope
+A ReTiCo module for DOPE pose-tracking. See below for more information.
 
 ### Installation and requirements
 
