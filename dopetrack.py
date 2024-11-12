@@ -14,6 +14,7 @@ from retico_vision.vision import PosePositionsIU, ImageIU
 from src import postprocess
 from src import visu
 from src.model import dope_resnet50, num_joints
+from src.lcr_net_ppi_improved import LCRNet_PPI_improved
 
 
 class DopeTrackingModule(retico_core.AbstractModule):
@@ -37,9 +38,11 @@ class DopeTrackingModule(retico_core.AbstractModule):
     def output_iu():
         return PosePositionsIU
 
-    def __init__(self, visualizer=False, **kwargs):
+    def __init__(self, visualizer=False, half=True, modelname='DOPErealtime_v1_0_0', **kwargs):
         """
-        :param visualizer: boolean to determine if webcam output with annotations is shown
+        :param visualizer: Boolean to determine if webcam output with annotations is shown. Defaults to False.
+        :param half: Boolean indicating whether to use half computation or not. Defaults to True.
+        :param modelname: Name of model checkpoint to use. Defaults to 'DOPErealtime_v1_0_0'.
         """
 
         super().__init__(**kwargs)
@@ -48,25 +51,8 @@ class DopeTrackingModule(retico_core.AbstractModule):
         self.queue = deque(maxlen=1)
         self._thisdir = path.realpath(path.dirname(__file__))
 
-    def detect_pose(self, image, modelname='DOPErealtime_v1_0_0', postprocessing='ppi', half=True):
-        """
-        Perform pose detection on an image.
-
-        :param image: Image to perform detections on.
-        :param modelname: Name of model checkpoint to use. Defaults to 'DOPErealtime_v1_0_0'.
-        :param postprocessing: The type of detection postprocessing to use (can be 'ppi' or 'nms'). Defaults to 'ppi'.
-        :param half: Boolean indicating whether to use half computation or not. Defaults to True.
-        """
-
-        if postprocessing=='ppi':
-            sys.path.append(self._thisdir + '/lcrnet-v2-improved-ppi')
-            try:
-                from src.lcr_net_ppi_improved import LCRNet_PPI_improved
-            except ModuleNotFoundError:
-                print("Failed to import PPI module. Using built-in NMS instead.")
-
         # use GPU if available, else use CPU
-        device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+        self.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
         # load model
         ckpt_fname = path.join(self._thisdir, 'src/models', modelname + '.pth.tgz')
@@ -76,29 +62,37 @@ class DopeTrackingModule(retico_core.AbstractModule):
             )
 
         print('Loading model', modelname)
-        ckpt = torch.load(ckpt_fname, map_location=device)
+        self.ckpt = torch.load(ckpt_fname, map_location=self.device)
 
         # Half computation is true by default. Change to false in case your device cannot handle half computation
         # Sets half computation usage
-        ckpt['half'] = half
-        ckpt['dope_kwargs']['rpn_post_nms_top_n_test'] = 1000
+        self.ckpt['half'] = half
+        self.ckpt['dope_kwargs']['rpn_post_nms_top_n_test'] = 1000
 
-        model = dope_resnet50(**ckpt['dope_kwargs'])
-        if ckpt['half']: model = model.half()
-        model = model.eval()
-        model.load_state_dict(ckpt['state_dict'])
-        model = model.to(device)
+        self.model = dope_resnet50(**self.ckpt['dope_kwargs'])
+        if self.ckpt['half']: self.model = self.model.half()
+        self.model = self.model.eval()
+        self.model.load_state_dict(self.ckpt['state_dict'])
+        self.model = self.model.to(self.device)
+
+    def detect_pose(self, image, postprocessing='ppi'):
+        """
+        Perform pose detection on an image.
+
+        :param image: Image to perform detections on.
+        :param postprocessing: The type of detection postprocessing to use (can be 'ppi' or 'nms'). Defaults to 'ppi'.
+        """
 
         # load image
         print('Loading image')
-        imlist = [ToTensor()(image).to(device)]
-        if ckpt['half']: imlist = [im.half() for im in imlist]
+        imlist = [ToTensor()(image).to(self.device)]
+        if self.ckpt['half']: imlist = [im.half() for im in imlist]
         resolution = imlist[0].size()[-2:]
 
         # forward pass
         print('Running DOPE')
         with torch.no_grad():
-            results = model(imlist, None)[0]
+            results = self.model(imlist, None)[0]
 
         # postprocess results (pose proposals integration, wrists/head assignment)
         print('Postprocessing')
@@ -114,7 +108,7 @@ class DopeTrackingModule(retico_core.AbstractModule):
                     res[part + '_pose2d'],
                     res[part + '_pose3d'],
                     resolution,
-                    **ckpt[part + '_ppi_kwargs']
+                    **self.ckpt[part + '_ppi_kwargs']
                 )
         else:
             for part in parts:
@@ -135,7 +129,7 @@ class DopeTrackingModule(retico_core.AbstractModule):
                 ]
                 if part == 'hand':
                     for i in range(len(detections[part])):
-                        detections[part][i]['hand_isright'] = bestcls < ckpt['hand_ppi_kwargs']['K']
+                        detections[part][i]['hand_isright'] = bestcls < self.ckpt['hand_ppi_kwargs']['K']
 
         return postprocess.assign_hands_and_head_to_body(detections)
 
