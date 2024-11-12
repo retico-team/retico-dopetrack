@@ -64,14 +64,14 @@ def visualize_bodyhandface2d(im, dict_poses2d, dict_scores=None, lw=2, max_paddi
     
     # pad if necessary (if some joints are outside image boundaries)
     pad_top, pad_bot, pad_lft, pad_rgt = 0, 0, 0, 0
-    for poses2d in dict_poses2d.values():
-        if poses2d.size==0: continue
-        xmin, ymin = np.min(poses2d.reshape(-1,2), axis=0)
-        xmax, ymax = np.max(poses2d.reshape(-1,2), axis=0)
-        pad_top = max(pad_top, min(max_padding, max(0, int(-ymin-5))))
-        pad_bot = max(pad_bot, min(max_padding, max(0, int(ymax+5-h))))
-        pad_lft = max(pad_lft, min(max_padding, max(0, int(-xmin-5))))
-        pad_rgt = max(pad_rgt, min(max_padding, max(0, int(xmax+5-w))))
+    # for poses2d in dict_poses2d.values():
+    #     if poses2d.size==0: continue
+    #     xmin, ymin = np.min(poses2d.reshape(-1,2), axis=0)
+    #     xmax, ymax = np.max(poses2d.reshape(-1,2), axis=0)
+    #     pad_top = max(pad_top, min(max_padding, max(0, int(-ymin-5))))
+    #     pad_bot = max(pad_bot, min(max_padding, max(0, int(ymax+5-h))))
+    #     pad_lft = max(pad_lft, min(max_padding, max(0, int(-xmin-5))))
+    #     pad_rgt = max(pad_rgt, min(max_padding, max(0, int(xmax+5-w))))
 
     imout = cv2.copyMakeBorder(im, top=pad_top, bottom=pad_bot, left=pad_lft, right=pad_rgt, borderType=cv2.BORDER_CONSTANT, value=[0,0,0] )
     if not bgr: imout = np.ascontiguousarray(imout[:,:,::-1])

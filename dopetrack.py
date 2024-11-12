@@ -149,8 +149,8 @@ class DopeTrackingModule(retico_core.AbstractModule):
             frame = np.asarray(image)
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-            # Flip frame horizontally for natural (selfie) visualization
-            frame = cv2.flip(frame, 1)
+            # Flip frame horizontally for natural (selfie) visualization. Inverts hand_isright boolean output.
+            # frame = cv2.flip(frame, 1)
 
             # Get width, height of frame
             frame_height, frame_width, _ = frame.shape
