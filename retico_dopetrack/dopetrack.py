@@ -1,5 +1,4 @@
 import time
-import sys
 from os import path
 import cv2
 import torch.cuda
@@ -11,10 +10,10 @@ from collections import deque
 import retico_core
 from retico_vision.vision import PosePositionsIU, ImageIU
 
-from src import postprocess
-from src import visu
-from src.model import dope_resnet50, num_joints
-from src.lcr_net_ppi_improved import LCRNet_PPI_improved
+from .src import postprocess
+from .src import visu
+from .src.model import dope_resnet50, num_joints
+from .src.lcr_net_ppi_improved import LCRNet_PPI_improved
 
 
 class DopeTrackingModule(retico_core.AbstractModule):
