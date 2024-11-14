@@ -7,8 +7,8 @@ See https://github.com/naver/dope
 
 Required Packages:  
 - pytorch  
-- torchvision
-- opencv
+- torchvision  
+- opencv  
 - numpy  
 
 
