@@ -5,11 +5,11 @@ A ReTiCo module for DOPE pose-tracking. See below for more information.
 
 See https://github.com/naver/dope 
 
-Required Packages:
-- pytorch
+Required Packages:  
+- pytorch  
 - torchvision
 - opencv
-- numpy
+- numpy  
 
 
 ### Example
