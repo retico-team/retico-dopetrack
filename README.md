@@ -8,9 +8,10 @@ See https://github.com/naver/dope
 
 Required Packages:  
 - pytorch  
-- torchvision  
-- opencv  
+- opencv-python  
+- pillow  
 - numpy  
+- matplotlib  
 
 In addition, this module relies on [retico-core](https://github.com/retico-team/retico-core) 
 and [retico-vision](https://github.com/retico-team/retico-vision).
