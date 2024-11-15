@@ -11,6 +11,7 @@ Required Packages:
 - opencv-python  
 - pillow  
 - numpy  
+- scipy  
 - matplotlib  
 
 In addition, this module relies on [retico-core](https://github.com/retico-team/retico-core) 
