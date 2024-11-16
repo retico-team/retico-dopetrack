@@ -1,11 +1,10 @@
 # retico-dopetrack
-A ReTiCo module for pose-tracking, based on https://github.com/naver/dope. 
-See below for more information.
+A ReTiCo module for pose-tracking, based on https://github.com/naver/dope.
 
 ### Installation and requirements
 
-Please download [this](http://download.europe.naverlabs.com/ComputerVision/DOPE_models/DOPErealtime_v1_0_0.pth.tgz)
-model and place the file in the `retico_dopetrack/src/models` directory.
+Please download [this model](http://download.europe.naverlabs.com/ComputerVision/DOPE_models/DOPErealtime_v1_0_0.pth.tgz)
+and place it in the `retico_dopetrack/src/models` directory.
 
 Required Packages:  
 - pytorch  
