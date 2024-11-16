@@ -4,7 +4,8 @@ See below for more information.
 
 ### Installation and requirements
 
-See https://github.com/naver/dope 
+Please download [this](http://download.europe.naverlabs.com/ComputerVision/DOPE_models/DOPErealtime_v1_0_0.pth.tgz)
+model and place the file in the `retico_dopetrack/src/models` directory.
 
 Required Packages:  
 - pytorch  
@@ -17,6 +18,7 @@ Required Packages:
 In addition, this module relies on [retico-core](https://github.com/retico-team/retico-core) 
 and [retico-vision](https://github.com/retico-team/retico-vision).
 
+See https://github.com/naver/dope for more information.
 
 ### Example
 ```python
